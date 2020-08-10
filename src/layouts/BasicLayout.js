@@ -65,7 +65,7 @@ class BasicLayout extends React.Component {
 
     getLayoutStyle = () => {
         return {
-            paddingLeft: '256px'
+            paddingLeft: '192px'
         }
     }
 

@@ -17,7 +17,7 @@ const getIcon = icon => {
             return <Icon component={() => <img src={icon} alt="icon" className={styles.icon} />} />;
         if (icon.startsWith('icon-'))
             return <IconFont type={icon} />;
-        return <Icon type={icon} alt="icon" className={styles.icon}/>;
+        return <Icon type={icon} alt="icon" />;
     }
     return icon;
 };

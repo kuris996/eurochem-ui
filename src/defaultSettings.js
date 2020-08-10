@@ -6,6 +6,6 @@ module.exports = {
     menu: {
         disableLocal: true,
     },
-    title: 'Eurochem Ui',
+    title: 'EuroChem UI',
     iconfontUrl: '',
 };

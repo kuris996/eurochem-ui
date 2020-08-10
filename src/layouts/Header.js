@@ -12,7 +12,7 @@ class HeaderView extends Component {
     };
 
     getHeadWidth = () => {
-        return 'calc(100% - 256px)';
+        return 'calc(100% - 192px)';
     }
 
     render() {

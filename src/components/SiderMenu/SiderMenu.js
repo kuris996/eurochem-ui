@@ -1,8 +1,10 @@
 import React, { PureComponent, Suspense } from 'react';
 import { Layout } from 'antd';
 import classNames from 'classnames';
+import Link from 'umi/link';
 import { getDefaultCollapsedSubMenus } from './SiderMenuUtils'
 import styles from './index.less';
+import { title } from '../../defaultSettings';
 
 const BaseMenu = React.lazy(() => import('./BaseMenu'));
 const { Sider } = Layout;
@@ -57,13 +59,17 @@ export default class SiderMenu extends React.Component {
             <Sider
                 trigger={null}
                 breakpoint="lg"
-                width={256}
+                width={192}
                 theme={theme}
                 collapsible={false}
                 collapsed={false}
                 className={siderClassName}
             >
-                <div className={styles.logo} id="logo"/>
+                <div className={styles.logo} id="logo">
+                    <Link to="/">
+                        <h1>{title}</h1>
+                    </Link>
+                </div>
                 <Suspense fallback={null}>
                     <BaseMenu
                         {...this.props}

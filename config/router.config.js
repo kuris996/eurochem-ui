@@ -4,93 +4,141 @@ export default [
         path: '/',
         component: '../layouts/BasicLayout',
         routes: [
-            { path: '/', redirect: '/dashboard' },
+            { path: '/', redirect: '/logistics' },
             {
-                path: '/dashboard',
-                name: 'dashboard',
-                icon: 'dashboard',
+                path: '/logistics',
+                name: 'Logistics',
+                icon: 'compass',
                 routes: [
                     { 
-                        path: '/dashboard', 
-                        redirect: '/dashboard/analysis',
-                        icon: 'dashboard',
+                        path: '/logistics', 
+                        redirect: '/logistics/routes',
                     },
                     {
-                        path: '/dashboard/analysis',
-                        name: 'analysis',
-                        icon: 'dashboard',
-                    },
-                    {
-                        path: '/dashboard/monitor',
-                        name: 'monitor',
-                        icon: 'dashboard',
-                    },
-                    {
-                        path: '/dashboard/workplace',
-                        name: 'workplace',
-                        icon: 'dashboard',
-                    },
-                ],
-            },
-            {
-                path: '/profile',
-                name: 'profile',
-                icon: 'profile',
-            },
-            {
-                path: '/list',
-                icon: 'table',
-                name: 'list',
-                routes: [
-                    { 
-                        path: '/list', 
-                        redirect: '/list/table-list',
-                        icon: 'dashboard',
-                    },
-                    {
-                        path: '/list/table-list',
-                        name: 'searchtable',
-                        icon: 'dashboard',
-                    },
-                    {
-                        path: '/list/basic-list',
-                        name: 'basiclist',
-                        icon: 'dashboard',
-                    },
-                    {
-                        path: '/list/card-list',
-                        name: 'cardlist',
-                        icon: 'dashboard',
-                    },
-                    {
-                        path: '/list/search',
-                        name: 'searchlist',
-                        icon: 'dashboard',
+                        path: '/logistics/routes',
+                        name: 'Routes',
                         routes: [
-                            {
-                                path: '/list/search',
-                                redirect: '/list/search/articles',
-                                icon: 'dashboard',
+                            { 
+                                path: '/logistics/routes', 
+                                redirect: '/logistics/routes/routes',
                             },
                             {
-                                path: '/list/search/articles',
-                                name: 'articles',
-                                icon: 'dashboard',
+                                path: '/logistics/routes/routes',
+                                name: 'Routes'
                             },
                             {
-                                path: '/list/search/projects',
-                                name: 'projects',
-                                icon: 'dashboard',
+                                path: '/logistics/routes/leg-costs',
+                                name: 'Leg Costs'
                             },
                             {
-                                path: '/list/search/applications',
-                                name: 'applications',
-                                icon: 'dashboard',
-                            },
-                        ],
+                                path: '/logistics/routes/location-costs',
+                                name: 'Location Costs'
+                            }
+                        ]
                     },
+                    {
+                        path: '/logistics/storage-units',
+                        name: 'Storage Units',
+                    },
+                    {
+                        path: '/logistics/distance-units',
+                        name: 'Distance Units',
+                    },
+                    {
+                        path: '/logistics/transfer-type',
+                        name: 'Transfer Type',
+                    },
+                    {
+                        path: '/logistics/location-cost-type',
+                        name: 'Location Cost Type',
+                    }
                 ],
             },
+            {
+                path: '/geography',
+                name: 'Geography',
+                icon: 'global',
+                routes: [
+                    { 
+                        path: '/geography', 
+                        redirect: '/geography/macro-regions',
+                    },
+                    {
+                        path: '/geography/macro-regions',
+                        name: 'Macro Regions'
+                    },
+                    {
+                        path: '/geography/sub-regions',
+                        name: 'Sub Regions'
+                    },
+                    {
+                        path: '/geography/area',
+                        name: 'Area'
+                    },
+                    {
+                        path: '/geography/weather',
+                        name: 'Weather'
+                    },
+                ]
+            },
+            {
+                path: '/indicative-prices',
+                name: 'Indicative Prices',
+                icon: 'gold'
+            },
+            {
+                path: '/currencies',
+                name: 'Currencies',
+                icon: 'dollar',
+                routes: [
+                    { 
+                        path: '/currencies', 
+                        redirect: '/currencies/currency',
+                    },
+                    {
+                        path: '/currencies/currency',
+                        name: 'Currency'
+                    },
+                    {
+                        path: '/currencies/currency-rates',
+                        name: 'Currency Rates'
+                    },
+                ]
+            },
+            {
+                path: '/products',
+                name: 'Products',
+                icon: 'appstore',
+                routes: [
+                    { 
+                        path: '/products', 
+                        redirect: '/products/product-group',
+                    },
+                    {
+                        path: '/products/product-group',
+                        name: 'Product Group'
+                    },
+                    {
+                        path: '/products/products',
+                        name: 'Products'
+                    },
+                ]
+            },
+            {
+                path: '/demand',
+                name: 'Demand',
+                icon: 'credit-card'
+            },
+            {
+                path: '/infrastructure',
+                name: 'Infrastructure',
+                icon: 'bank'
+            },
+            {
+                path: '/map',
+                name: 'Map',
+                icon: 'environment'
+            }
         ]
     },
 ]

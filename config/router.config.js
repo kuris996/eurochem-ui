@@ -17,6 +17,7 @@ export default [
                     {
                         path: '/logistics/routes',
                         name: 'Routes',
+                        icon: 'branches',
                         routes: [
                             { 
                                 path: '/logistics/routes', 
@@ -24,33 +25,41 @@ export default [
                             },
                             {
                                 path: '/logistics/routes/routes',
-                                name: 'Routes'
+                                name: 'Routes',
+                                icon: 'edit',
+                                component: './Logistics/Routes'
                             },
                             {
                                 path: '/logistics/routes/leg-costs',
-                                name: 'Leg Costs'
+                                name: 'Leg Costs',
+                                icon: 'edit',
                             },
                             {
                                 path: '/logistics/routes/location-costs',
-                                name: 'Location Costs'
+                                name: 'Location Costs',
+                                icon: 'edit',
                             }
                         ]
                     },
                     {
                         path: '/logistics/storage-units',
                         name: 'Storage Units',
+                        icon: 'database'
                     },
                     {
                         path: '/logistics/distance-units',
                         name: 'Distance Units',
+                        icon: 'compass'
                     },
                     {
                         path: '/logistics/transfer-type',
                         name: 'Transfer Type',
+                        icon: 'wifi'
                     },
                     {
                         path: '/logistics/location-cost-type',
                         name: 'Location Cost Type',
+                        icon: 'moneyCollect'
                     }
                 ],
             },

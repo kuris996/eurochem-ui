@@ -3,6 +3,7 @@ import { Layout } from 'antd';
 import Animate from 'rc-animate';
 import styles from './Header.less';
 import TopNavHeader from '@/components/TopNavHeader';
+import { connect } from 'dva';
 
 const { Header } = Layout;
 
@@ -11,19 +12,17 @@ class HeaderView extends Component {
         visible: true,
     };
 
-    getHeadWidth = () => {
-        return 'calc(100% - 192px)';
-    }
-
     render() {
+        const { setting } = this.props;
+        const { navTheme, fixedHeader } = setting;
         const { visible } = this.state
-        const width = this.getHeadWidth();
         const headerView = visible ? (
             <Header 
-                style={{ padding: 0, width, zIndex: 2 }}
-                className={styles.fixedHeader}
+                style={{ padding: 0, width: 'calc(100% - 192px)', zIndex: 2 }}
+                className={fixedHeader ? styles.fixedHeader : ''}
             > 
                 <TopNavHeader
+                    theme={navTheme}
                     mode="horizontal"
                     {...this.props} 
                 />
@@ -37,4 +36,6 @@ class HeaderView extends Component {
     }
 }
 
-export default (HeaderView);
+export default connect(({ setting }) => ({   
+    setting,
+}))(HeaderView);

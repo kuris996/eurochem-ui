@@ -73,8 +73,8 @@ export default class SiderMenu extends React.Component {
                 <Suspense fallback={null}>
                     <BaseMenu
                         {...this.props}
-                        mode="vertical"
-                        style={{ padding: '16px 0', width: '100%' }}
+                        mode="inline"
+                        style={{ padding: '0px 0', width: '100%' }}
                         {...defaultProps}
                     />
                 </Suspense>

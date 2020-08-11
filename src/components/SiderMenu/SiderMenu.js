@@ -46,7 +46,7 @@ export default class SiderMenu extends React.Component {
     };
 
     render() {
-        const { fixSiderbar, theme } = this.props;
+        const { fixSiderbar, theme, location = { pathname: '/'} } = this.props;
         const { openKeys } = this.state;
         const defaultProps = { openKeys }
 
@@ -74,6 +74,8 @@ export default class SiderMenu extends React.Component {
                     <BaseMenu
                         {...this.props}
                         mode="inline"
+                        handleOpenChange={this.handleOpenChange}
+                        onOpenChange={this.handleOpenChange}
                         style={{ padding: '0px 0', width: '100%' }}
                         {...defaultProps}
                     />

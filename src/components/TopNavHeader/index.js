@@ -22,6 +22,10 @@ export default class TopNavHeader extends PureComponent {
         const { theme, menuData } = this.props;
         const { maxWidth } = this.state;
         const flatMenuKeys = getFlatMenuKeys(menuData);
+        const noChildrenMenuData = (menuData || []).map((item) => ({
+            ...item,
+            children: undefined,
+        }));
         return (
             <div className={`${styles.head} ${theme === 'light' ? styles.light : ''}`}>
                 <div
@@ -38,10 +42,11 @@ export default class TopNavHeader extends PureComponent {
                             }}
                         >
                             <BaseMenu 
-                                isTop={true} 
+                                {...this.props} 
+                                menuData={noChildrenMenuData}
+                                handleOpenChange={() => {}}
                                 flatMenuKeys={flatMenuKeys} 
                                 className={styles.menu}
-                                {...this.props} 
                                 style={{ width: 'calc(100%) - 192px' }}
                             />
                         </div>

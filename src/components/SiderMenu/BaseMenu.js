@@ -27,35 +27,11 @@ export default class BaseMenu extends PureComponent {
     getNavMenuItems = menusData => {
         if (!menusData)
             return [];
-        const data = menusData
-            .filter(item => item.name && !item.hideInMenu)
-            .map(item => this.getMenuItem(item))
-            .filter(item => item);
-        return data
-    };
-
-    getMenuItem = item => {
-        return <Menu.Item key={item.path}>{this.getMenuItemPath(item)}</Menu.Item>;
-    }
-
-    getNavSideMenuItems = (menusData, selectedKeys) => {
-        if (!menusData)
-            return [];
-        menusData =  menusData
-            .filter(item => item.name && !item.hideInMenu && item.path === selectedKeys[0])
-            .map(item => item.children)
-            .filter(item => item)
-        return this.getSideMenuItems(menusData[0])
-    }
-
-    getSideMenuItems = (menusData) => {
-        if (!menusData)
-            return [];
         return menusData
             .filter(item => item.name && !item.hideInMenu)
             .map(item => this.getSubMenuOrItem(item))
             .filter(item => item);
-    }
+    };
 
     getSelectedMenuKeys = pathname => {
         const { flatMenuKeys } = this.props;
@@ -119,10 +95,6 @@ export default class BaseMenu extends PureComponent {
             return path;
         return `/${path || ''}`.replace(/\/+/g, '/');
     };
-    
-    getPopupContainer = () => {
-        return document.body;
-    };
 
     getRef = ref => {
         this.wrap = ref;
@@ -130,16 +102,32 @@ export default class BaseMenu extends PureComponent {
 
     render() {
         const {
+            openKeys,
             isTop,
             theme,
             mode,
             location: { pathname },
             className,
+            menuData
         } = this.props;
 
-        let selectedKeys = this.getSelectedMenuKeys(pathname);
+        let finalMenuData = menuData
 
-        const { style, menuData } = this.props;  
+        let selectedKeys = this.getSelectedMenuKeys(pathname);
+        if (!selectedKeys.length && openKeys)
+            selectedKeys = [openKeys[openKeys.length - 1]];
+        
+        let props = {};
+        if (openKeys) {
+            props = {
+                openKeys: openKeys.length === 0 ? [...selectedKeys] : openKeys,
+            };
+            const [key] = selectedKeys;
+            if (key)
+                finalMenuData = (menuData || []).find((item) => item.path === key)?.children || [];
+        }
+
+        const { handleOpenChange, style } = this.props;  
         const cls = classNames(className, {
             'top-nav-menu': isTop,
         });
@@ -150,11 +138,13 @@ export default class BaseMenu extends PureComponent {
                     key="Menu"
                     mode={mode}
                     theme={theme}
+                    onOpenChange={handleOpenChange}
                     selectedKeys={selectedKeys}
                     style={style}
                     className={cls}
+                    {...props}
                 >
-                    {isTop ? this.getNavMenuItems(menuData) : this.getNavSideMenuItems(menuData, selectedKeys) }                    
+                    {this.getNavMenuItems(finalMenuData)}                    
                 </Menu>
                 <div ref={this.getRef} />
             </>

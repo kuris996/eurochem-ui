@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import Context from './MenuContext';
 import SiderMenu from '@/components/SiderMenu'
 import Header from './Header';
+import Footer from './Footer';
 import styles from './BasicLayout.less';
 
 const { Content } = Layout;
@@ -104,6 +105,7 @@ class BasicLayout extends React.Component {
                     <Content className={styles.content} style={contentStyle}>
                         {children}
                     </Content>
+                    <Footer/>
                 </Layout>
             </Layout>
         );

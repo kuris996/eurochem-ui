@@ -121,11 +121,12 @@ export default [
                 routes: [
                     { 
                         path: '/products', 
-                        redirect: '/products/product-group',
+                        redirect: '/products/product-groups',
                     },
                     {
-                        path: '/products/product-group',
-                        name: 'Product Group'
+                        path: '/products/product-groups',
+                        name: 'Product Groups',
+                        component: './Products/ProductGroups'
                     },
                     {
                         path: '/products/products',

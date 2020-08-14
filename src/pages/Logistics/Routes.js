@@ -1,9 +1,6 @@
-import React, { PureComponent, Fragment } from 'react';
-import { connect } from 'dva'
-import moment from 'moment';
-import Link from 'umi/link';
-import StandardTable from '@/components/StandardTable'
-import PageHeaderWrapper from '@/components/PageHeaderWrapper'
+import React, { PureComponent } from 'react';
+import StandardTable from '@/components/StandardTable';
+import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import { PlusOutlined, SaveOutlined, ExportOutlined, ImportOutlined, InboxOutlined } from '@ant-design/icons';
 import {
     Card,
@@ -13,14 +10,10 @@ import {
     Input,
     Select,
     DatePicker,
-    InputNumber,
     Button,
-    Upload
 } from 'antd';
 
 import styles from './TableList.less';
-
-const { Dragger } = Upload;
 
 const { Option } = Select;
 

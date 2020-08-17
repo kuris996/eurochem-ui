@@ -1,12 +1,9 @@
-import React, { PureComponent, Fragment } from 'react';
-import { Table, Alert } from 'antd';
+import React, { PureComponent } from 'react';
+import { Table } from 'antd';
 import styles from './index.less';
 
 class StandardTable extends PureComponent {
-    constructor(props) {
-        super(props);
-    }
-
+    
     handleTableChange = (pagination, filters, sorter) => {
         const { onChange } = this.props;
         if (onChange) {
@@ -14,12 +11,8 @@ class StandardTable extends PureComponent {
         }
     };
 
-    cleanSelectedKeys = () => {
-        this.handleRowSelectChange([], []);
-    };
-
     render() {
-        const { data = [], rowKey, components, ...rest } = this.props;
+        const { data = [], rowKey, ...rest } = this.props;
         const { pagination } = data;
 
         const paginationProps = {
@@ -32,11 +25,11 @@ class StandardTable extends PureComponent {
             <div className={styles.standardTable}>
                 <Table
                     bordered
-                    components={components}
                     rowKey={rowKey || 'id'}
                     dataSource={data}
                     pagination={paginationProps}
                     onChange={this.handleTableChange}
+                    size="small"
                     {...rest}
                 />
             </div>

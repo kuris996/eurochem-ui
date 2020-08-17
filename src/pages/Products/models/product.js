@@ -1,14 +1,14 @@
-import { addProductGroup, removeProductGroup, updateProductGroup, queryProductGroup } from '@/services/productGroupApi'
+import { addProduct, removeProduct, updateProduct, queryProduct } from '@/services/productApi'
 
 export default {
-    namespace: 'productGroup',
+    namespace: 'product',
 
     state: {},   
 
     effects: {
         *add({ payload, callback }, { call, put }) {
             yield call(function* () {                
-                addProductGroup(payload, callback)
+                addProduct(payload, callback)
                 yield put({
                     type: 'done'
                 });
@@ -16,7 +16,7 @@ export default {
         },
         *remove({ payload, callback }, { call, put }) {
             yield call(function* () {
-                removeProductGroup(payload, callback)
+                removeProduct(payload, callback)
                 yield put({
                     type: 'done'
                 })
@@ -24,7 +24,7 @@ export default {
         },
         *update({ payload, callback }, { call, put }) {
             yield call(function* () {
-                updateProductGroup(payload, callback)
+                updateProduct(payload, callback)
                 yield put({
                     type: 'done'
                 })
@@ -32,7 +32,7 @@ export default {
         },
         *fetch({ payload, callback }, { call, put }) {
             yield call(function* () {
-                queryProductGroup(payload, callback)
+                queryProduct(payload, callback)
                 yield put({
                     type: 'done',
                 })

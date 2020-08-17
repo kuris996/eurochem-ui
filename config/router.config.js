@@ -49,7 +49,8 @@ export default [
                     {
                         path: '/logistics/distance-units',
                         name: 'Distance Units',
-                        icon: 'compass'
+                        icon: 'compass',
+                        component: './Logistics/DistanceUnits'
                     },
                     {
                         path: '/logistics/transfer-type',
@@ -130,7 +131,8 @@ export default [
                     },
                     {
                         path: '/products/products',
-                        name: 'Products'
+                        name: 'Products',
+                        component: './Products/Products'
                     },
                 ]
             },

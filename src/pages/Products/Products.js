@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import StandardTable from '@/components/StandardTable';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import { 
@@ -57,28 +57,59 @@ const EditableCell = ({
     )
 }
 
-class ProductGroups extends React.Component {
+class Products extends React.Component {
     constructor(props) {
         super(props);
 
-        this.columns = [
+        this.columns = [            
             {
-                title: 'Code',
-                dataIndex: 'code',
-                key: 'code',
+                title: 'Local Name',
+                dataIndex: 'local_name',
+                key: 'local_name',
                 editable: true,
+                width: 100,
             },
             {
-                title: 'Description',
-                dataIndex: 'description',
-                key: 'description',
+                title: 'En Name',
+                dataIndex: 'en_name',
+                key: 'en_name',
                 editable: true,
+                width: 100,
+            },
+            {
+                title: 'Product Group',
+                dataIndex: 'product_group_code',
+                key: 'product_group_code',
+                editable: true,
+                width: 100,
+            },
+            {
+                title: 'Product Type',
+                dataIndex: 'product_type',
+                key: 'product_type',
+                editable: true,
+                width: 100,
+            },
+            {
+                title: 'Tn Ved Code',
+                dataIndex: 'tn_ved_code',
+                key: 'tn_ved_code',
+                editable: true,
+                width: 100,
+            },
+            {
+                title: 'Rail Code',
+                dataIndex: 'rail_code',
+                key: 'rail_code',
+                editable: true,
+                width: 100,
             },
             {
                 title: 'Operation',
                 dataIndex: 'operation',
                 key: 'operation',
                 editable: false,
+                width: 180,
                 fixed: 'right',
                 render: (text, record) => {
                     const editable = this.isEditing(record)
@@ -94,7 +125,7 @@ class ProductGroups extends React.Component {
                             </Popconfirm>
                         </span>
                     ) : (
-                        <span>
+                        <span style={{ whiteSpace: 'nowrap' }}>
                             <Button onClick={() => { this.handleSave(record) }}>
                                 <SaveOutlined/> Save
                             </Button>
@@ -109,10 +140,9 @@ class ProductGroups extends React.Component {
             }
         ]
 
-        this.state = {
-            editingKey: '',
-            addRecord: false,
-            data:[]
+        this.state = { 
+            editingKey: null, 
+            data:[] 
         }    
     }
 
@@ -120,32 +150,41 @@ class ProductGroups extends React.Component {
         this.handleRefresh()
     }
 
-    handleAdd = async () => {
+    handleAdd = () => {
         const { data } = this.state;
         const newData = {
-            code: '',
-            description: '',
+            id: '',
+            local_name: '',
+            en_name: '',
+            product_group_code: '',
+            product_type: '',
+            tn_ved_code: '',
+            rail_code: ''
         };
         this.setState({
-            addRecord: true,
+            editingKey: '',
             data: [...data, newData],
         });
-        this.formRef.current.setFieldsValue({ code: '', description: '' });
+        this.formRef.current.setFieldsValue({ 
+            local_name: '',
+            en_name: '',
+            product_group_code: '',
+            product_type: '',
+            tn_ved_code: '',
+            rail_code: '' 
+        });
     }
 
     handleRemove = (record) => {
         const { dispatch } = this.props;       
 
         var callback = (function(error, data, response) {
-            this.setState({
-                selectedRows: [],
-            })
             this.handleRefresh()
         }).bind(this)
 
         dispatch({
-            type: 'productGroup/remove',
-            payload: record.code,
+            type: 'product/remove',
+            payload: record.id,
             callback
         }) 
     }
@@ -160,12 +199,12 @@ class ProductGroups extends React.Component {
             this.setState({ data: data })
         }).bind(this)
         dispatch({
-            type: 'productGroup/fetch',
+            type: 'product/fetch',
             payload: {...params},
             callback,
         })
         this.setState({
-            editingKey: '', addRecord: false
+            editingKey: null
         })
     }
 
@@ -174,58 +213,68 @@ class ProductGroups extends React.Component {
     }
 
     handleEdit = (record) => {
-        this.formRef.current.setFieldsValue({ code: '', description: '', ...record });
+        this.formRef.current.setFieldsValue({
+            id: '',
+            local_name: '',
+            en_name: '',
+            product_group_code: '',
+            product_type: '',
+            tn_ved_code: '',
+            rail_code: '',
+            ...record
+        });
         this.setState({
-            editingKey: record.code
+            editingKey: record.id
         })
     }
 
-    handleSave = async (record) => {
+    handleSave = (record) => {
         const { dispatch } = this.props;
-        const { addRecord } = this.state;
-        try {
-            const row = (await this.formRef.current.validateFields());
+        const { editingKey } = this.state;
+        this.formRef.current.validateFields().then(fields => {
             var callback = (function(error, data, response) {
                 this.handleRefresh()
             }).bind(this)
-            if (addRecord) {
+            if (editingKey === '') {
                 dispatch({
-                    type: 'productGroup/add',
-                    payload: {...row},
+                    type: 'product/add',
+                    payload: {...fields},
                     callback,
                 })
             } else {
                 dispatch({
-                    type: 'productGroup/update',
-                    payload: {...record, ...row},
+                    type: 'product/update',
+                    payload: {...record, ...fields},
                     callback,
                 })
             }
             this.setState({
-                editingKey: '', addRecord: false
+                editingKey: null
             })
-        } catch (error) {
-            console.log('Validate Failed:', error);
-        }
+        })
+        .catch(errorInfo => {
+            console.log('Validate Failed:', errorInfo);
+        });        
     }
 
     handleCancel = (record) => {
         this.setState({
-            editingKey: '', addRecord: false,
+            editingKey: null
         })
-        this.formRef.current.setFieldsValue({ code: '', description: '' });
+        //this.formRef.current.setFieldsValue({ code: '', description: '' });
+        this.formRef.current.resetFields()
         this.handleRefresh()
     }
 
     isEditing = (record) => {
         const { editingKey } = this.state
-        return record.code === editingKey;
+        return record.id === editingKey;
     }
 
     formRef = React.createRef();
 
     render() {
-        const { data, addRecord } = this.state;
+        const { data, editingKey } = this.state;
         
         const columns = this.columns.map(col => {
             if (!col.editable)
@@ -243,12 +292,12 @@ class ProductGroups extends React.Component {
         });
 
         return (
-            <PageHeaderWrapper title="Product Groups">
+            <PageHeaderWrapper title="Products">
                 <Card bordered={false}>
                     <div>
                         <div className={styles.tableListOperator}>
                             <span>
-                                <Button type="primary" onClick={this.handleAdd} disabled={addRecord === true}>
+                                <Button type="primary" onClick={this.handleAdd} disabled={editingKey !== null}>
                                     <PlusOutlined/> Add
                                 </Button>
                                 <Button type="primary" onClick={this.handleRefresh}>
@@ -270,6 +319,7 @@ class ProductGroups extends React.Component {
                                         cell: EditableCell,
                                     },
                                 }}
+                                scroll={{ x: 800 }}
                                 columns={columns}
                                 data={data}
                                 onChange={this.handleStandardTableChange}
@@ -282,6 +332,6 @@ class ProductGroups extends React.Component {
     }
 }
 
-export default connect(({ productGroup }) => ({
-    productGroup,
-}))(ProductGroups);
+export default connect(({ product }) => ({
+    product,
+}))(Products);

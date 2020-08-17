@@ -1,14 +1,14 @@
-import { addProductGroup, removeProductGroup, updateProductGroup, queryProductGroup } from '@/services/productGroupApi'
+import { addDistanceUnit, removeDistanceUnit, updateDistanceUnit, queryDistanceUnit } from '@/services/distanceUnitApi'
 
 export default {
-    namespace: 'productGroup',
+    namespace: 'distanceUnit',
 
     state: {},   
 
     effects: {
         *add({ payload, callback }, { call, put }) {
             yield call(function* () {                
-                addProductGroup(payload, callback)
+                addDistanceUnit(payload, callback)
                 yield put({
                     type: 'done'
                 });
@@ -16,7 +16,7 @@ export default {
         },
         *remove({ payload, callback }, { call, put }) {
             yield call(function* () {
-                removeProductGroup(payload, callback)
+                removeDistanceUnit(payload, callback)
                 yield put({
                     type: 'done'
                 })
@@ -24,7 +24,7 @@ export default {
         },
         *update({ payload, callback }, { call, put }) {
             yield call(function* () {
-                updateProductGroup(payload, callback)
+                updateDistanceUnit(payload, callback)
                 yield put({
                     type: 'done'
                 })
@@ -32,7 +32,7 @@ export default {
         },
         *fetch({ payload, callback }, { call, put }) {
             yield call(function* () {
-                queryProductGroup(payload, callback)
+                queryDistanceUnit(payload, callback)
                 yield put({
                     type: 'done',
                 })

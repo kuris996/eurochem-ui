@@ -15,12 +15,12 @@ export function addDistanceUnit(params, callback) {
 }
 
 export function removeDistanceUnit(params, callback) {
-    return distanceUnitApi.deleteDistanceUnitApiV1DistanceUnitDistanceUnitCodeDelete(params, callback)
+    return distanceUnitApi.deleteDistanceUnitApiV1DistanceUnitDistanceUnitIdDelete(params, callback)
 }
 
 export function updateDistanceUnit(params, callback) {
     const model = UpdateDistanceUnitModel.constructFromObject(params)
-    return distanceUnitApi.updateDistanceUnitApiV1DistanceUnitDistanceUnitCodePatch(params['code'], model, callback)
+    return distanceUnitApi.updateDistanceUnitApiV1DistanceUnitDistanceUnitIdPatch(params['id'], model, callback)
 }
 
 export function queryDistanceUnit(params, callback) {

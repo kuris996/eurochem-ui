@@ -29,12 +29,11 @@
     position: relative;
     z-index: 10;
     min-height: 100vh;
-    box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
+    box-shadow: 1px 1px 0 0 @border-color-split;
     &.fixSiderBar {
         position: fixed;
         top: 0;
         left: 0;
-        box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
         :global {
             .ant-menu-root {
                 height: ~'calc(100vh - @{nav-header-height})';
@@ -51,7 +50,7 @@
     }
     &.light {
         background-color: white;
-        box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
+        box-shadow: 1px 1px 0 0 @border-color-split;
         .logo {
             background: white;
             box-shadow: 1px 1px 0 0 @border-color-split;

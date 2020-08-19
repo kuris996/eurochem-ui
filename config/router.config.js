@@ -27,7 +27,6 @@ export default [
                                 path: '/logistics/routes/routes',
                                 name: 'Routes',
                                 icon: 'edit',
-                                component: './Logistics/Routes'
                             },
                             {
                                 path: '/logistics/routes/leg-costs',
@@ -44,7 +43,8 @@ export default [
                     {
                         path: '/logistics/storage-units',
                         name: 'Storage Units',
-                        icon: 'database'
+                        icon: 'database',
+                        component: './Logistics/StorageUnits'
                     },
                     {
                         path: '/logistics/distance-units',
@@ -55,7 +55,8 @@ export default [
                     {
                         path: '/logistics/transfer-type',
                         name: 'Transfer Type',
-                        icon: 'wifi'
+                        icon: 'wifi',
+                        component: './Logistics/TransferType'
                     },
                     {
                         path: '/logistics/location-cost-type',
@@ -75,7 +76,8 @@ export default [
                     },
                     {
                         path: '/geography/macro-regions',
-                        name: 'Macro Regions'
+                        name: 'Macro Regions',
+                        component: './Geography/MacroRegions'
                     },
                     {
                         path: '/geography/sub-regions',
@@ -107,7 +109,8 @@ export default [
                     },
                     {
                         path: '/currencies/currency',
-                        name: 'Currency'
+                        name: 'Currency',
+                        component: './Currencies/Currencies'
                     },
                     {
                         path: '/currencies/currency-rates',

@@ -1,69 +1,27 @@
 import React, { PureComponent } from 'react'
 import PageHeaderWrapper from '../PageHeaderWrapper'
 import StandardTable from '../StandardTable'
+import StandardOperation from '../StandardOperation'
 import {
     Card,
     Button,
-    Input,
-    InputNumber,
     Form,
-    Popconfirm
 } from 'antd';
 import { 
-    CloseCircleOutlined, 
     PlusOutlined, 
-    SaveOutlined, 
     ExportOutlined, 
     ImportOutlined,
     ReloadOutlined, 
-    DeleteOutlined, 
-    EditOutlined 
 } from '@ant-design/icons';
 
 import styles from './index.less';
-
-const EditableCell = ({
-    editing,
-    dataIndex,
-    title,
-    inputType,
-    record,
-    index,
-    children,
-    ...restProps
-}) => {
-    const inputNode = inputType === 'number' ? <InputNumber /> : <Input />
-
-    return (
-        <td {...restProps}>
-            { editing ? (
-                <Form.Item
-                    name={dataIndex}
-                    style={{ margin: 0 }}
-                    rules={[
-                        {
-                            required: true,
-                            message: `Please Input ${title}!`,
-                        }
-                    ]}
-                >
-                    {inputNode}
-                </Form.Item>
-            ) : (
-                children
-            )}
-        </td>
-    )
-}
 
 class StandardPage extends PureComponent
 {
     constructor(props) {
         super(props);
 
-        this.state = {
-            data: [], editingKey: '',
-        }
+        this.tableRef = React.createRef();
     }
 
     componentDidMount() {
@@ -75,50 +33,40 @@ class StandardPage extends PureComponent
     }
 
     handleAdd = () => {
-        const { data } = this.state;
         const { formRef, newRow } = this.props;
-        this.setState({
-            editingKey: '',
-            data: [...data, newRow()]
-        })
         formRef.current.resetFields()
+        newRow()      
+        this.tableRef.current.setEditingKey('')
     }
 
     handleRemove = (record) => {
         const { removeRow, rowKey } = this.props;
-        var callback = (function(error, data, response) {
-            this.handleRefresh()
-        }).bind(this)
-        removeRow(record[rowKey], callback)
+        removeRow(record[rowKey])
     }
 
     handleRefresh = () => {
         const { fetchData } = this.props
-        const callback = (function(error, data, response) {
-            this.setState({ data: data })
-        }).bind(this)
-        fetchData(callback);
-        this.setState({ editingKey: null })
+        fetchData();
+        this.tableRef.current.setEditingKey(null)
     }
 
     handleEdit = (record) => {
         const { rowKey, formRef } = this.props
         formRef.current.setFieldsValue({ ...record });
-        this.setState({ editingKey: record[rowKey] })
+        this.tableRef.current.setEditingKey(record[rowKey])
     }
 
     handleSave = (record) => {
-        const { formRef, addRow, updateRow, rowKey } = this.props;
+        const { formRef, addRow, updateRow } = this.props;
         const { editingKey } = this.state;
-        formRef.current.validateFields().then(fields => {
-            var callback = (function(error, data, response) {
-                this.handleRefresh()
-            }).bind(this)
-            if (editingKey === '')
-                addRow({...fields}, callback)                
-            else
-                updateRow({...fields } , callback)                
-            this.setState({ editingKey: null })
+        formRef.current.validateFields().then(fields => {            
+            if (editingKey === '') {
+                delete record.id
+                addRow({...record, ...fields})                
+            } else {
+                updateRow({...record, ...fields }) 
+            }               
+            this.tableRef.current.setEditingKey(null)
         })
         .catch(errorInfo => {
             console.log('Validate Failed:', errorInfo);
@@ -129,72 +77,18 @@ class StandardPage extends PureComponent
         const { formRef } = this.props;
         formRef.current.resetFields();
         this.handleRefresh();
-        this.setState({
-            editingKey: null
-        });
+        this.tableRef.current.setEditingKey(null)
     }
     
     isEditing = (record) => {
         const { editingKey } = this.state;
         const { rowKey } = this.props;
         return record[rowKey] === editingKey;
-    }
-
-    renderOperation = (text, record) => {
-        const editable = this.isEditing(record) 
-        return !editable ? (
-            <span style={{ whiteSpace: 'nowrap' }}>
-                <Button onClick={() => { this.handleEdit(record) }}>
-                    <EditOutlined/> Edit
-                </Button>
-                <Popconfirm title="Sure to Remove?" onConfirm={() => { this.handleRemove(record) }}>
-                    <Button style={{ marginLeft: 8 }}>
-                        <DeleteOutlined/> Remove
-                    </Button>
-                </Popconfirm>
-            </span>
-        ) : (
-            <span style={{ whiteSpace: 'nowrap' }}>
-                <Button onClick={() => { this.handleSave(record) }}>
-                    <SaveOutlined/> Save
-                </Button>
-                <Popconfirm title="Sure to Cancel?" onConfirm={() => { this.handleCancel(record) }}>
-                    <Button style={{ marginLeft: 8 }}>
-                        <CloseCircleOutlined/> Cancel
-                    </Button>
-                </Popconfirm>
-            </span>
-        )
-    }
+    }    
 
     render() {
-        const { data, editingKey } = this.state;
-        const { title, formRef, rowKey = rowKey || 'id', columns, ...rest } = this.props;
-
-        var newColumns = [...columns, { 
-            title: 'Operation',
-            dataIndex: 'operation',
-            key: 'operation',
-            editable: false,
-            width: 210,
-            fixed: 'right',
-            render: this.renderOperation
-        }]
-
-        var mergedColumns = newColumns.map(col => {
-            if (!col.editable)
-                return col;
-            return {
-                ...col,
-                onCell: (record) => ({
-                    record,
-                    inputType: 'text',
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    editing: this.isEditing(record),
-                }),
-            };
-        });
+        const { editingKey } = this.state;
+        const { title, formRef, data, rowKey = rowKey || 'id', initialValues, extraOperations, ...rest } = this.props;
 
         return (
             <PageHeaderWrapper title={title}>
@@ -216,22 +110,25 @@ class StandardPage extends PureComponent
                                 </Button>
                             </span>
                         </div>
-                        <Form ref={formRef} component={false}>
+                        <Form ref={formRef} component={false} initialValues={initialValues} >
                             <StandardTable 
-                                rowKey={rowKey} 
-                                components={{
-                                    body: {
-                                        cell: EditableCell,
-                                    },
-                                }}
-                                columns={mergedColumns}
+                                ref={this.tableRef}
+                                rowKey={rowKey}
                                 data={data}
+                                extraOperations={extraOperations}
+                                scroll={{ x: 'max-content' }}
                                 onChange={this.handleStandardTableChange}
-                                scroll={{ x: 600 }}
-                                {...rest} />
+                                editable = {{
+                                    onEdit: record => { this.handleEdit(record) },
+                                    onRemove: record => { this.handleRemove(record) },
+                                    onSave: record => { this.handleSave(record) },
+                                    onCancel: record => { this.handleCancel(record) },
+                                }}
+                                {...rest} 
+                            />
                         </Form>
                     </div>
-                 </Card>
+                </Card>
             </PageHeaderWrapper>
         )
     }

@@ -20,7 +20,7 @@ export function removeProduct(params, callback) {
 
 export function updateProduct(params, callback) {
     const model = UpdateProductModel.constructFromObject(params)
-    return productApi.updateProductApiV1ProductProductIdPatch(params['productId'], model, callback)
+    return productApi.updateProductApiV1ProductProductIdPatch(params['id'], model, callback)
 }
 
 export function queryProduct(params, callback) {

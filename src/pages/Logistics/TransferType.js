@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'dva';
 import StandardPage from '@/components/StandardPage';
 
-class DistanceUnits extends React.Component {
+class StorageUnits extends React.Component {
 
     formRef = React.createRef();
 
@@ -26,7 +26,7 @@ class DistanceUnits extends React.Component {
     addRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
-            type: 'distanceUnit/add',
+            type: 'transferType/add',
             payload,
             callback: (function(error, data, response) {
                 this.fetchData()
@@ -37,7 +37,7 @@ class DistanceUnits extends React.Component {
     updateRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
-            type: 'distanceUnit/update',
+            type: 'transferType/update',
             payload,
             callback: (function(error, data, response) {
                 this.fetchData()
@@ -48,7 +48,7 @@ class DistanceUnits extends React.Component {
     removeRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
-            type: 'distanceUnit/remove',
+            type: 'transferType/remove',
             payload,
             callback: (function(error, data, response) {
                 this.fetchData()
@@ -60,7 +60,7 @@ class DistanceUnits extends React.Component {
         const { dispatch } = this.props;
         const params = { offset: 0, limit: 100 }
         dispatch({
-            type: 'distanceUnit/fetch',
+            type: 'transferType/fetch',
             payload: {...params},
             callback: (function(error, data, response) {
                 this.setState({ data: data.data })
@@ -95,7 +95,7 @@ class DistanceUnits extends React.Component {
 
         return (
             <StandardPage 
-                title="Distance Units" 
+                title="Transfer Type" 
                 columns={columns}
                 formRef={this.formRef}
                 data={this.state.data}
@@ -106,11 +106,10 @@ class DistanceUnits extends React.Component {
                 removeRow={this.removeRow}
                 fetchData={this.fetchData}
             />
-        )
-        
+        )        
     }
 }
 
-export default connect(({ distanceUnit }) => ({
-    distanceUnit,
-}))(DistanceUnits);
+export default connect(({ transferType }) => ({
+    transferType,
+}))(StorageUnits);

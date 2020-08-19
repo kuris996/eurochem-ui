@@ -13,8 +13,6 @@ import {
     Button,
 } from 'antd';
 
-import styles from './TableList.less';
-
 const { Option } = Select;
 
 class Routes extends PureComponent {
@@ -112,8 +110,8 @@ class Routes extends PureComponent {
             <PageHeaderWrapper title="Routes">
                 <Card  bordered={false}>
                     <div>
-                        <div className={styles.tableListForm}>{this.renderForm()}</div>
-                        <div className={styles.tableListOperator}>
+                        <div>{this.renderForm()}</div>
+                        <div>
                             {selectedRows.length > 0 && (
                                 <span>
                                     <Button>Remove</Button>

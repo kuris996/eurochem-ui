@@ -15,12 +15,12 @@ export function addProductGroup(params, callback) {
 }
 
 export function removeProductGroup(params, callback) {
-    return productGroupApi.deleteProductGroupApiV1ProductGroupProductGroupCodeDelete(params, callback)
+    return productGroupApi.deleteProductGroupApiV1ProductGroupProductGroupIdDelete(params, callback)
 }
 
 export function updateProductGroup(params, callback) {
     const model = UpdateProductGroupModel.constructFromObject(params)
-    return productGroupApi.updateProductGroupApiV1ProductGroupProductGroupCodePatch(params['code'], model, callback)
+    return productGroupApi.updateProductGroupApiV1ProductGroupProductGroupIdPatch(params['id'], model, callback)
 }
 
 export function queryProductGroup(params, callback) {

@@ -4,31 +4,23 @@ import StandardPage from '@/components/StandardPage';
 
 class ProductGroups extends React.Component {
 
-    formRef = React.createRef();
-
-    state = {
-        data: []
-    }
+    pageRef = React.createRef();
 
     newRow = () => {
-        const row = {
+        return {
             id: '',
             code: '',
             description: '',
         }
-        const { data } = this.state;
-        this.setState({
-            data: [...data, row]
-        })
     }
 
     addRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'productGroup/add',
-            payload,
+            payload: payload,
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.updateData()
             }).bind(this)
         })
     }
@@ -38,8 +30,9 @@ class ProductGroups extends React.Component {
         dispatch({
             type: 'productGroup/update',
             payload,
+            id: payload['id'],
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.updateData()
             }).bind(this)
         })
     }
@@ -48,21 +41,20 @@ class ProductGroups extends React.Component {
         const { dispatch } = this.props;
         dispatch({
             type: 'productGroup/remove',
-            payload,
+            payload: payload['id'],
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.updateData()
             }).bind(this)
         })
     }
 
-    fetchData = () => {
+    fetchData = (params) => {
         const { dispatch } = this.props;
-        const params = { offset: 0, limit: 100 }
         dispatch({
             type: 'productGroup/fetch',
             payload: {...params},
             callback: (function(error, data, response) {
-                this.setState({ data: data.data })
+                this.pageRef.current.setData(data)
             }).bind(this)
         })
     }
@@ -87,10 +79,10 @@ class ProductGroups extends React.Component {
 
         return (
             <StandardPage 
+                ref={this.pageRef}
                 title="Product Groups" 
                 columns={columns}
                 formRef={this.formRef}
-                data={this.state.data}
                 rowKey="id"
                 newRow={this.newRow}
                 addRow={this.addRow}

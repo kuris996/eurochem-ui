@@ -22,81 +22,74 @@ class StandardPage extends PureComponent
         super(props);
 
         this.tableRef = React.createRef();
+
+        this.state = {
+            data: [],
+            pagination: {
+                current: 1,
+                pageSize: 10,
+                total: 0
+            }
+        }
     }
 
-    componentDidMount() {
-        this.handleRefresh()
+    setData = (data) => {
+        this.setState({
+            data: data.data,
+            pagination: {
+                current: (data.offset / 10) + 1,
+                pageSize: data.limit,
+                total: data.total
+            }
+        })
     }
 
-    handleStandardTableChange=(pagination, filtersArg, sorter) => {
-        // TODO
+    updateData = () => {
+        const { pagination } = this.state
+        this.handleStandardTableChange(pagination)
     }
 
+    handleStandardTableChange=(pagination, filtersArg, sorter) => { 
+        const { fetchData } = this.props
+        const params = { offset: (pagination.current - 1) * 10, limit: 10 }
+        fetchData(params);
+    }
+    
     handleAdd = () => {
-        const { formRef, newRow } = this.props;
-        formRef.current.resetFields()
-        newRow()      
+        const { newRow } = this.props;
+        const { data, pagination } = this.state;
+        const current = parseInt(pagination.total / 10) + 1
+        this.setState({
+            data: [...data, newRow()],
+            pagination: {
+                current: current,
+                pageSize: 10,
+                total: pagination.total + 1
+            }
+        })
         this.tableRef.current.setEditingKey('')
     }
 
-    handleRemove = (record) => {
-        const { removeRow, rowKey } = this.props;
-        removeRow(record[rowKey])
+    handleCancel = (recored) => {
+
     }
 
     handleRefresh = () => {
         const { fetchData } = this.props
-        fetchData();
-        this.tableRef.current.setEditingKey(null)
+        const params = { offset: 0, limit: 10 }
+        fetchData(params);
     }
-
-    handleEdit = (record) => {
-        const { rowKey, formRef } = this.props
-        formRef.current.setFieldsValue({ ...record });
-        this.tableRef.current.setEditingKey(record[rowKey])
-    }
-
-    handleSave = (record) => {
-        const { formRef, addRow, updateRow } = this.props;
-        const { editingKey } = this.state;
-        formRef.current.validateFields().then(fields => {            
-            if (editingKey === '') {
-                delete record.id
-                addRow({...record, ...fields})                
-            } else {
-                updateRow({...record, ...fields }) 
-            }               
-            this.tableRef.current.setEditingKey(null)
-        })
-        .catch(errorInfo => {
-            console.log('Validate Failed:', errorInfo);
-        });   
-    }
-
-    handleCancel = (record) => {
-        const { formRef } = this.props;
-        formRef.current.resetFields();
-        this.handleRefresh();
-        this.tableRef.current.setEditingKey(null)
-    }
-    
-    isEditing = (record) => {
-        const { editingKey } = this.state;
-        const { rowKey } = this.props;
-        return record[rowKey] === editingKey;
-    }    
-
+   
     render() {
-        const { editingKey } = this.state;
-        const { title, formRef, data, rowKey = rowKey || 'id', initialValues, extraOperations, ...rest } = this.props;
-
+        const { title, rowKey = rowKey || 'id', initialValues, extraOperations, ...rest } = this.props;
+        const { data, pagination } = this.state
         return (
             <PageHeaderWrapper title={title}>
                 <Card bordered={false}>
                     <div>
                         <div className={styles.tableListOperator}>
                             <span>
-                                <Button type="primary" onClick={this.handleAdd} disabled={editingKey !== null}>
+                                <Button type="primary" onClick={this.handleAdd}>
                                     <PlusOutlined/> Add
                                 </Button>
                                 <Button type="primary" onClick={this.handleRefresh}>
@@ -110,23 +103,18 @@ class StandardPage extends PureComponent
                                 </Button>
                             </span>
                         </div>
-                        <Form ref={formRef} component={false} initialValues={initialValues} >
-                            <StandardTable 
-                                ref={this.tableRef}
-                                rowKey={rowKey}
-                                data={data}
-                                extraOperations={extraOperations}
-                                scroll={{ x: 'max-content' }}
-                                onChange={this.handleStandardTableChange}
-                                editable = {{
-                                    onEdit: record => { this.handleEdit(record) },
-                                    onRemove: record => { this.handleRemove(record) },
-                                    onSave: record => { this.handleSave(record) },
-                                    onCancel: record => { this.handleCancel(record) },
-                                }}
-                                {...rest} 
-                            />
-                        </Form>
+                        <StandardTable 
+                            ref={this.tableRef}
+                            rowKey={rowKey}
+                            data={data}
+                            pagination={pagination}
+                            extraOperations={extraOperations}
+                            scroll={{ x: 'max-content' }}
+                            onChange={this.handleStandardTableChange}
+                            onCancel={this.handleCancel}
+                            editable={true}
+                            {...rest} 
+                        />
                     </div>
                 </Card>
             </PageHeaderWrapper>

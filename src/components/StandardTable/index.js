@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Table } from 'antd';
+import { Table, Form } from 'antd';
 import styles from './index.less';
 import EditableCell from './EditableCell'
 import StandardOperation from '../StandardOperation'
@@ -12,6 +12,8 @@ class StandardTable extends React.Component {
         this.state = {
             editingKey: null,
         }
+
+        this.formRef = React.createRef()
     }
 
     handleTableChange = (pagination, filters, sorter) => {
@@ -21,10 +23,52 @@ class StandardTable extends React.Component {
         }
     };
 
-    setEditingKey = (key) => {
+    setEditingKey = (key, record) => {
+        const { rowKey } = this.props;
         this.setState({
             editingKey: key
+        })            
+        if (record && key === record[rowKey])
+            this.formRef.current.setFieldsValue({...record})
+        else
+            this.formRef.current.resetFields()
+    }
+
+    handleEdit = (record) => {
+        const { rowKey } = this.props;
+        this.setState({
+            editingKey: record[rowKey]
         })
+        this.formRef.current.setFieldsValue({...record})
+    }
+
+    handleRemove = (record) => {
+        const { removeRow } = this.props;
+        removeRow(record)
+    }
+
+    handleSave = (record) => {
+        const { addRow, updateRow } = this.props;
+        const { editingKey } = this.state;
+        this.formRef.current.validateFields().then(fields => {            
+            if (editingKey === '') {
+                delete record.id
+                addRow({...record, ...fields})                
+            } else {
+                updateRow({...record, ...fields }) 
+            }               
+            this.setEditingKey(null)
+        })
+        .catch(errorInfo => {
+            console.log('Validate Failed:', errorInfo);
+        });
+    }
+
+    handleCancel = (record) => {
+        const { onCancel } = this.props;
+        this.setEditingKey(null)
+        if (onCancel)
+            onCancel(record)
     }
 
     isEditing = (record) => {
@@ -34,19 +78,18 @@ class StandardTable extends React.Component {
     }
 
     render() {
-        const { data = [], rowKey, columns, editable, ...rest } = this.props;
+        const { data, rowKey, columns, pagination, initialValues, editable, ...rest } = this.props;
 
         const paginationProps = {
             showSizeChanger: true,
             showQuickJumper: true,
+            ...pagination
         };
 
         var newColumns = [...columns]
         if (editable) {
-            const { onEdit, onRemove, onSave, onCancel } = editable
             newColumns.push({
                 title: 'Operation',
-                dataIndex: 'operation',
                 editable: false,
                 fixed: 'right',
                 width: 150,
@@ -56,10 +99,10 @@ class StandardTable extends React.Component {
                             text={text} 
                             record={record}
                             isEditing={this.isEditing}
-                            onRemove={onRemove}
-                            onEdit={onEdit}
-                            onSave={onSave}
-                            onCancel={onCancel}
+                            onEdit={this.handleEdit}
+                            onRemove={this.handleRemove}
+                            onSave={this.handleSave}
+                            onCancel={this.handleCancel}
                             {...rest}
                         />
                     )
@@ -86,21 +129,23 @@ class StandardTable extends React.Component {
 
         return (
             <div className={styles.standardTable}>
-                <Table
-                    bordered
-                    rowKey={rowKey || 'id'}
-                    dataSource={data}
-                    pagination={paginationProps}
-                    onChange={this.handleTableChange}
-                    size="small"
-                    components={{
-                        body: {
-                            cell: EditableCell,
-                        },
-                    }}
-                    columns={mergedColumns}
-                    {...rest}
-                />
+                <Form ref={this.formRef} component={false} initialValues={initialValues} >
+                    <Table
+                        bordered
+                        rowKey={rowKey || 'id'}
+                        dataSource={data}
+                        pagination={paginationProps}
+                        onChange={this.handleTableChange}
+                        size="small"
+                        components={{
+                            body: {
+                                cell: EditableCell,
+                            },
+                        }}
+                        columns={mergedColumns}
+                        {...rest}
+                    />
+                </Form>
             </div>
         );
     }

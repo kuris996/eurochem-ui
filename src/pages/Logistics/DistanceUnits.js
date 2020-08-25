@@ -1,69 +1,95 @@
 import React from 'react';
 import { connect } from 'dva';
 import StandardPage from '@/components/StandardPage';
+import {
+    Input,
+    Form,
+} from 'antd';
 
 class DistanceUnits extends React.Component {
 
-    formRef = React.createRef();
+    pageRef = React.createRef();
 
-    state = {
-        data: []
+    formLayout = {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 13 },
+    };
+
+    getFormTitle = (current) => {
+        return !current.id  ? "Add Distance Unit" : "Edit Distance Unit"
     }
 
-    newRow = () => {
-        const row = {
-            id: '',
-            code: '',
-            local_name: '',
-            en_name: ''
-        }
-        const { data } = this.state;
-        this.setState({
-            data: [...data, row]
-        })
+    getFormContent = (current) => {
+        return (
+            <>
+                <Form.Item 
+                        name="code" 
+                        label="Code:"
+                        {...this.formLayout}
+                        initialValue={current.code}
+                        rules={[{ required: true }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                        name="local_name" 
+                        label="Local Name:"
+                        {...this.formLayout}
+                        initialValue={current.local_name}
+                        rules={[{ required: false }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                        name="en_name" 
+                        label="En Name:"
+                        {...this.formLayout}
+                        initialValue={current.en_name}
+                        rules={[{ required: false }]}>
+                    <Input />
+                </Form.Item>
+            </>
+        )
     }
 
-    addRow = (payload) => {
+    handleAddRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'distanceUnit/add',
             payload,
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    updateRow = (payload) => {
+    handleUpdateRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'distanceUnit/update',
             payload,
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    removeRow = (payload) => {
+    handleRemoveRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'distanceUnit/remove',
-            payload,
+            payload: payload['id'],
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    fetchData = () => {
+    handleFetchData = (params) => {
         const { dispatch } = this.props;
-        const params = { offset: 0, limit: 100 }
         dispatch({
             type: 'distanceUnit/fetch',
             payload: {...params},
             callback: (function(error, data, response) {
-                this.setState({ data: data.data })
+                this.pageRef.current.setData(data)
             }).bind(this)
         })
     }
@@ -74,37 +100,34 @@ class DistanceUnits extends React.Component {
                 title: 'Code',
                 dataIndex: 'code',
                 key: 'code',
-                editable: true,
                 width: 100,
             },         
             {
                 title: 'Local Name',
                 dataIndex: 'local_name',
                 key: 'local_name',
-                editable: true,
                 width: 150,
             },
             {
                 title: 'En Name',
                 dataIndex: 'en_name',
                 key: 'en_name',
-                editable: true,
                 width: 150,
             },
         ]
 
         return (
             <StandardPage 
+                ref={this.pageRef}
                 title="Distance Units" 
                 columns={columns}
-                formRef={this.formRef}
-                data={this.state.data}
                 rowKey="id"
-                newRow={this.newRow}
-                addRow={this.addRow}
-                updateRow={this.updateRow}
-                removeRow={this.removeRow}
-                fetchData={this.fetchData}
+                formTitle={this.getFormTitle}
+                formContent={this.getFormContent}
+                onAdd={this.handleAddRow}
+                onUpdate={this.handleUpdateRow}
+                onRemove={this.handleRemoveRow}
+                onFetchData={this.handleFetchData}
             />
         )
         

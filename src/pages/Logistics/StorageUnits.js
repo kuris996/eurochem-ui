@@ -1,69 +1,95 @@
 import React from 'react';
 import { connect } from 'dva';
 import StandardPage from '@/components/StandardPage';
+import {
+    Input,
+    Form,
+} from 'antd';
 
 class StorageUnits extends React.Component {
 
-    formRef = React.createRef();
+    pageRef = React.createRef();
 
-    state = {
-        data: []
+    formLayout = {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 13 },
+    };
+
+    getFormTitle = (current) => {
+        return !current.id  ? "Add Storage Unit" : "Edit Storage Unit"
     }
 
-    newRow = () => {
-        const row = {
-            id: '',
-            code: '',
-            local_name: '',
-            en_name: ''
-        }
-        const { data } = this.state;
-        this.setState({
-            data: [...data, row]
-        })
+    getFormContent = (current) => {
+        return (
+            <>
+                <Form.Item 
+                        name="code" 
+                        label="Code:"
+                        {...this.formLayout}
+                        initialValue={current.code}
+                        rules={[{ required: true }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                        name="local_name" 
+                        label="Local Name:"
+                        {...this.formLayout}
+                        initialValue={current.local_name}
+                        rules={[{ required: false }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                        name="en_name" 
+                        label="En Name:"
+                        {...this.formLayout}
+                        initialValue={current.en_name}
+                        rules={[{ required: false }]}>
+                    <Input />
+                </Form.Item>
+            </>
+        )
     }
 
-    addRow = (payload) => {
+    handleAddRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'storageUnit/add',
             payload,
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    updateRow = (payload) => {
+    handleUpdateRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'storageUnit/update',
             payload,
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    removeRow = (payload) => {
+    handleRemoveRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'storageUnit/remove',
-            payload,
+            payload: payload['id'],
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    fetchData = () => {
+    handleFetchData = (params) => {
         const { dispatch } = this.props;
-        const params = { offset: 0, limit: 100 }
         dispatch({
             type: 'storageUnit/fetch',
             payload: {...params},
             callback: (function(error, data, response) {
-                this.setState({ data: data.data })
+                this.pageRef.current.setData(data)
             }).bind(this)
         })
     }
@@ -95,16 +121,16 @@ class StorageUnits extends React.Component {
 
         return (
             <StandardPage 
+                ref={this.pageRef}
                 title="Storage Units" 
                 columns={columns}
-                formRef={this.formRef}
-                data={this.state.data}
                 rowKey="id"
-                newRow={this.newRow}
-                addRow={this.addRow}
-                updateRow={this.updateRow}
-                removeRow={this.removeRow}
-                fetchData={this.fetchData}
+                formTitle={this.getFormTitle}
+                formContent={this.getFormContent}
+                onAdd={this.handleAddRow}
+                onUpdate={this.handleUpdateRow}
+                onRemove={this.handleRemoveRow}
+                onFetchData={this.handleFetchData}
             />
         )        
     }

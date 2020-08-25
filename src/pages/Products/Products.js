@@ -12,8 +12,6 @@ import {
     PlusOutlined,
 } from '@ant-design/icons';
 
-import styles from '@/components/StandardPage/index.less';
-
 
 const { Option } = Select;
 

@@ -1,54 +1,82 @@
 import React from 'react';
 import { connect } from 'dva';
 import StandardPage from '@/components/StandardPage';
+import {
+    Input,
+    Form,
+} from 'antd';
 
 class ProductGroups extends React.Component {
 
     pageRef = React.createRef();
 
-    newRow = () => {
-        return {
-            id: '',
-            code: '',
-            description: '',
-        }
+    formLayout = {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 13 },
+    };
+
+    getFormTitle = (current) => {
+        return !current.id  ? "Add Product Group" : "Edit Product Group"
     }
 
-    addRow = (payload) => {
+    getFormContent = (current) => {
+        return (
+            <>
+                <Form.Item 
+                        name="code" 
+                        label="Code:"
+                        {...this.formLayout}
+                        initialValue={current.code}
+                        rules={[{ required: true }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                        name="description" 
+                        label="Description:"
+                        {...this.formLayout}
+                        initialValue={current.description}
+                        rules={[{ required: false }]}>
+                    <Input />
+                </Form.Item>
+            </>
+        )
+    }
+
+    handleAddRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'productGroup/add',
             payload: payload,
             callback: (function(error, data, response) {
-                this.pageRef.current.updateData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    updateRow = (payload) => {
+    handleUpdateRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'productGroup/update',
             payload,
             id: payload['id'],
             callback: (function(error, data, response) {
-                this.pageRef.current.updateData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    removeRow = (payload) => {
+    handleRemoveRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'productGroup/remove',
             payload: payload['id'],
             callback: (function(error, data, response) {
-                this.pageRef.current.updateData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    fetchData = (params) => {
+    handleFetchData = (params) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'productGroup/fetch',
@@ -65,14 +93,12 @@ class ProductGroups extends React.Component {
                 title: 'Code',
                 dataIndex: 'code',
                 key: 'code',
-                editable: true,
                 width: 100
             },
             {
                 title: 'Description',
                 dataIndex: 'description',
                 key: 'description',
-                editable: true,
                 width: 200
             },
         ]
@@ -82,13 +108,13 @@ class ProductGroups extends React.Component {
                 ref={this.pageRef}
                 title="Product Groups" 
                 columns={columns}
-                formRef={this.formRef}
                 rowKey="id"
-                newRow={this.newRow}
-                addRow={this.addRow}
-                updateRow={this.updateRow}
-                removeRow={this.removeRow}
-                fetchData={this.fetchData}
+                formTitle={this.getFormTitle}
+                formContent={this.getFormContent}
+                onAdd={this.handleAddRow}
+                onUpdate={this.handleUpdateRow}
+                onRemove={this.handleRemoveRow}
+                onFetchData={this.handleFetchData}
             />
         )    
     }

@@ -4,37 +4,26 @@ import {
     Popconfirm,
 } from 'antd';
 import { 
-    CloseCircleOutlined, 
-    SaveOutlined, 
     DeleteOutlined, 
     EditOutlined 
 } from '@ant-design/icons';
 
 import styles from './index.less'
 
-class StandardOperation extends React.Component {
+class StandardOperation extends PureComponent {
     render() {
-        const { record, isEditing, onEdit, onRemove, onSave, onCancel, extraOperations } = this.props
-        return !isEditing(record) ? (
+        const { record, onUpdateRow, onRemoveRow, extraOperations } = this.props
+        return (
             <span className={styles.standardOperation}>
-                <Button onClick={() => { onEdit(record) }}>
+                <Button onClick={() => { onUpdateRow(record) }}>
                     <EditOutlined/>
                 </Button>
-                <Popconfirm title="Sure to Remove?" onConfirm={() => { onRemove(record) }}>
+                <Popconfirm title="Sure to Remove?" onConfirm={() => { onRemoveRow(record) }}>
                     <Button style={{ marginLeft: 8 }}>
                         <DeleteOutlined/>
                     </Button>
                 </Popconfirm>
                 { extraOperations && extraOperations(record) }
-            </span>
-        ) : (
-            <span className={styles.standardOperation}>
-                <Button onClick={() => { onSave(record) }}>
-                    <SaveOutlined/>
-                </Button>
-                <Button style={{ marginLeft: 8 }} onClick={() => { onCancel(record) }}>
-                    <CloseCircleOutlined/>
-                </Button>
             </span>
         )
     }

@@ -1,23 +1,24 @@
 import React from 'react';
 import { connect } from 'dva';
-import StandardPage from '@/components/StandardPage';
+import PageHeaderWrapper from '@/components//PageHeaderWrapper'
+import StandardTable from '@/components//StandardTable'
+import StandardButtonBox from '@/components//StandardButtonBox' 
 import {
     Button,
     Select,
     Input,
     Form,
-    Modal
+    Card
 } from 'antd';
 import { 
     PlusOutlined,
 } from '@ant-design/icons';
 
-
 const { Option } = Select;
 
 class Products extends React.Component {
 
-    pageRef = React.createRef();
+    tableRef = React.createRef();
 
     formLayout = {
         labelCol: { span: 7 },
@@ -25,6 +26,7 @@ class Products extends React.Component {
     };
 
     state = {
+        parent: undefined,
         productGroups: [],
     }
 
@@ -102,13 +104,24 @@ class Products extends React.Component {
         )
     }
 
+    handleAdd = (item) => {
+        this.tableRef.current.add(item)
+    }
+
+    handleRefresh = () => {
+        this.tableRef.current.refreshData()
+    }
+
     handleAddRow = (payload) => {
         const { dispatch } = this.props;
+        const { parent } = this.state;
+        if (parent !== undefined)
+            payload = ({ parent_id: parent.id, ...payload  })
         dispatch({
             type: 'product/add',
             payload,
             callback: (function(error, data, response) {
-                this.pageRef.current.handleRefresh()
+                this.handleRefresh()
             }).bind(this)
         })
     }
@@ -119,7 +132,7 @@ class Products extends React.Component {
             type: 'product/update',
             payload,
             callback: (function(error, data, response) {
-                this.pageRef.current.handleRefresh()
+                this.handleRefresh()
             }).bind(this)
         })
     }
@@ -130,14 +143,15 @@ class Products extends React.Component {
             type: 'product/remove',
             payload: payload['id'],
             callback: (function(error, data, response) {
-                this.pageRef.current.handleRefresh()
+                this.handleRefresh()
             }).bind(this)
         })
     }
-
+    
     convertListToTree = (items, id = null, link = 'parent_id') => items
         .filter(item => item[link] === id)
-        .map(item => ({ ...item, children: this.convertListToTree(items, item.id) }));
+        .map(item => ({ ...item, children: this.convertListToTree(items, item.id) }))
+
 
     handleFetchData = (params) => {
         const { dispatch } = this.props;
@@ -150,7 +164,10 @@ class Products extends React.Component {
                     ...data,
                     data: this.convertListToTree(data.data)
                 }
-                this.pageRef.current.setData(newData)
+                this.setState({
+                    parent: undefined
+                })
+                this.tableRef.current.setData(newData)
             }).bind(this)
         })
 
@@ -166,7 +183,10 @@ class Products extends React.Component {
     }
 
     addChildRow = (record) => {
-        this.pageRef.current.handleAdd(record)
+        this.setState({
+            parent: record
+        })
+        this.tableRef.current.add(record)
     }
 
     extraOperations = (record) => {
@@ -178,8 +198,6 @@ class Products extends React.Component {
     }
 
     render() {
-        const { modalVisible } = this.state;
-
         const columns = [ 
             {
                 title: 'Local Name',
@@ -220,19 +238,28 @@ class Products extends React.Component {
         ]
 
         return (
-            <StandardPage 
-                ref={this.pageRef}
-                title="Products" 
-                columns={columns}
-                rowKey="id"
-                formTitle={this.getFormTitle}
-                formContent={this.getFormContent}
-                onAdd={this.handleAddRow}
-                onUpdate={this.handleUpdateRow}
-                onRemove={this.handleRemoveRow}
-                onFetchData={this.handleFetchData}
-                extraOperations={this.extraOperations}
-            />
+            <PageHeaderWrapper title="Products" >
+                <Card bordered={false}>
+                    <div>
+                        <StandardButtonBox
+                            onAdd={this.handleAdd}
+                            onRefresh={this.handleRefresh}
+                        />
+                        <StandardTable 
+                            ref={this.tableRef}
+                            columns={columns}
+                            rowKey="id"
+                            formTitle={this.getFormTitle}
+                            formContent={this.getFormContent}
+                            onAdd={this.handleAddRow}
+                            onUpdate={this.handleUpdateRow}
+                            onRemove={this.handleRemoveRow}
+                            onFetchData={this.handleFetchData}
+                            extraOperations={this.extraOperations}
+                        />
+                    </div>
+                </Card>
+            </PageHeaderWrapper>
         )    
     }
 }

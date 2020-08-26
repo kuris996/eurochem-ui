@@ -1,18 +1,12 @@
 import React, { PureComponent } from 'react'
 import PageHeaderWrapper from '../PageHeaderWrapper'
 import StandardTable from '../StandardTable'
+import StandardButtonBox from '../StandardButtonBox'
 import {
     Card,
-    Button,
     Form,
     Modal
 } from 'antd';
-import { 
-    PlusOutlined, 
-    ExportOutlined, 
-    ImportOutlined,
-    ReloadOutlined, 
-} from '@ant-design/icons';
 
 import styles from './index.less';
 
@@ -28,8 +22,7 @@ class StandardPage extends PureComponent {
                 total: 0
             },
             modalVisible: false,
-            current: undefined,
-            parent: undefined
+            current: undefined
         }
         
         this.formRef = React.createRef()
@@ -59,8 +52,7 @@ class StandardPage extends PureComponent {
     handleAdd = (item) => {
         this.setState({
             modalVisible: true,
-            current: undefined,
-            parent: item
+            current: undefined
         })
     }
 
@@ -79,17 +71,13 @@ class StandardPage extends PureComponent {
 
     handleSubmit = (e) => {
         const { onAdd, onUpdate } = this.props
-        const { current, parent } = this.state
+        const { current } = this.state
         e.preventDefault();
         const id = current ? current.id : '';
         this.formRef.current.validateFields().then(fields => { 
             if (current === undefined) {
-                if (onAdd) {
-                    if (parent !== undefined)
-                        onAdd({ parent_id: parent.id, ...fields })
-                    else
-                        onAdd(fields)
-                }
+                if (onAdd)
+                    onAdd(fields)
             } else {
                 if (onUpdate)
                     onUpdate({id, ...fields})
@@ -116,28 +104,16 @@ class StandardPage extends PureComponent {
     }
    
     render() {
-        const { title, rowKey = rowKey || 'id', extraOperations, onAddRow, formContent, formTitle,  ...rest } = this.props;
+        const { title, rowKey = rowKey || 'id', extraOperations, onAddRow, formContent, formTitle, initialValues,  ...rest } = this.props;
         const { data, pagination, modalVisible, current = {} } = this.state
         return (
             <PageHeaderWrapper title={title}>
                 <Card bordered={false}>
                     <div>
-                        <div className={styles.tableListOperator}>
-                            <span>
-                                <Button type="primary" onClick={this.handleAdd}>
-                                    <PlusOutlined/> Add
-                                </Button>
-                                <Button type="primary" onClick={this.handleRefresh}>
-                                    <ReloadOutlined/> Refresh
-                                </Button>
-                                <Button type="primary">
-                                    <ExportOutlined/> Export
-                                </Button>
-                                <Button type="primary">
-                                    <ImportOutlined/> Import
-                                </Button>
-                            </span>
-                        </div>
+                        <StandardButtonBox
+                            onAdd={this.handleAdd}
+                            onRefresh={this.handleRefresh}
+                        />
                         <StandardTable 
                             rowKey={rowKey}
                             data={data}
@@ -160,7 +136,7 @@ class StandardPage extends PureComponent {
                     onOk={this.handleSubmit}
                     onCancel={this.handleCancel}
                 >
-                    <Form ref={this.formRef} onSubmit={this.handleSumbit}>
+                    <Form ref={this.formRef} onSubmit={this.handleSumbit} initialValues={initialValues}>
                         {formContent(current )}
                     </Form>
                 </Modal>

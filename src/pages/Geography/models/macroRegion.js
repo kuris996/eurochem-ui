@@ -22,9 +22,9 @@ export default {
                 })
             })
         },
-        *update({ payload, id, callback }, { call, put }) {
+        *update({ payload, callback }, { call, put }) {
             yield call(function* () {
-                updateMacroRegion(payload, id, callback)
+                updateMacroRegion(payload, callback)
                 yield put({
                     type: 'done'
                 })

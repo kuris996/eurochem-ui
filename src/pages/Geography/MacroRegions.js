@@ -2,19 +2,34 @@ import React from 'react';
 import { connect } from 'dva';
 import StandardPage from '@/components/StandardPage';
 import StandardTable from '@/components/StandardTable';
-import { Switch, Table, Button } from 'antd';
+import { 
+    Switch, 
+    Button,
+    Form,
+    Input,
+    Modal
+} from 'antd';
 import { 
     PlusOutlined,
 } from '@ant-design/icons';
 
+import styles from '@/components/StandardPage/index.less'
+
 class MacroRegions extends React.Component {
 
+    pageRef = React.createRef();
     formRef = React.createRef();
 
-    state = {
-        data: []
-    }
+    formLayout = {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 13 },
+    };
 
+    state = {
+        parent: undefined,
+        modalVisible: false,
+    }
+    /*
     newRow = () => {
         const row = {
             id: '',
@@ -30,65 +45,114 @@ class MacroRegions extends React.Component {
             data: [...data, row]
         })
     }
+    */
 
-    addRow = (payload) => {
+    getFormTitle = (current) => {
+        return !current.id ? "Add Macro Region" : "Edit Macro Region"
+    }
+
+    getFormContent = (current) => {
+        return (
+            <>
+                <Form.Item 
+                    name="code" 
+                    label="Code:"
+                    {...this.formLayout}
+                    initialValue={current.code}
+                    rules={[{ required: true }]}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                    name="local_name" 
+                    label="Local Name:"
+                    {...this.formLayout}
+                    initialValue={current.local_name}
+                    rules={[{ required: true }]}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                    name="en_name" 
+                    label="En Name:"
+                    {...this.formLayout}
+                    initialValue={current.en_name}
+                    rules={[{ required: true }]}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                    name="description" 
+                    label="Description:"
+                    {...this.formLayout}
+                    initialValue={current.description}
+                    rules={[{ required: true }]}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                    valuePropName="checked"
+                    name="monthly_data" 
+                    label="Monthly Data:"
+                    {...this.formLayout}
+                    initialValue={current.monthly_data}
+                    rules={[{ required: false }]}
+                >
+                    <Switch />
+                </Form.Item>
+            </>
+        )
+    }
+
+    handleAddRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'macroRegion/add',
-            payload,
+            payload: ({ ...payload, levels: [] }),
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    updateRow = (payload) => {
+    handleUpdateRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'macroRegion/update',
             payload,
-            id: payload.id,
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    removeRow = (payload) => {
+    handleRemoveRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'macroRegion/remove',
-            payload,
+            payload: payload['id'],
             callback: (function(error, data, response) {
-                this.fetchData()
+                this.pageRef.current.handleRefresh()
             }).bind(this)
         })
     }
 
-    fetchData = () => {
+    handleFetchData = (params) => {
         const { dispatch } = this.props;
-        const params = { offset: 0, limit: 100 }
         dispatch({
             type: 'macroRegion/fetch',
             payload: {...params},
             callback: (function(error, data, response) {
-                this.setState({ data: data.data })
+                this.pageRef.current.setData(data)
             }).bind(this)
         })
     }
 
     addLevel = (record) => {
-        const { data } = this.state
-        record.levels = [...record.levels, {
-            level: '',
-            local_name: '',
-            en_name: '',
-            description: ''
-        }]
         this.setState({
-            data: [...data]
+            modalVisible: true,
+            parent: record
         })
-        console.log(record, this)
     }
 
     render() {
@@ -96,36 +160,26 @@ class MacroRegions extends React.Component {
             {
                 title: 'Macro Code',
                 dataIndex: 'code',
-                editable: true,
-                inputType: 'text',
                 width: 100,
             },         
             {
                 title: 'Local Name',
                 dataIndex: 'local_name',
-                editable: true,
-                inputType: 'text',
                 width: 200,
             },
             {
                 title: 'En Name',
                 dataIndex: 'en_name',
-                editable: true,
-                inputType: 'text',
                 width: 200,
             },
             {
                 title: 'Description',
                 dataIndex: 'description',
-                editable: true,
-                inputType: 'text',
                 width: 200,
             },
             {
                 title: 'Monthly',
                 dataIndex: 'monthly_data',
-                editable: true,
-                inputType: 'switch',
                 width: 100,
                 render: (text, record) => (
                     <span><Switch disabled={true} checked={record.monthly_data} /></span>
@@ -142,15 +196,58 @@ class MacroRegions extends React.Component {
             ];
         
             const { levels } = record
+            const { modalVisible } = this.state
             
             return (
-                <StandardTable 
-                    rowKey={'id'}
-                    columns={columns} 
-                    data={levels}
-                    isEditing={ () => {} }
-                    scroll={{ x: 'max-content' }}
-                />
+                <div>
+                    <StandardTable 
+                        rowKey={'id'}
+                        columns={columns} 
+                        data={levels}
+                    />
+                    <Modal
+                        className={styles.standardPageForm}
+                        width={640}
+                        bodyStyle={{ padding: '28px 0 0' }}
+                        destroyOnClose
+                        visible={modalVisible}
+                    >
+                        <Form ref={this.formRef}>
+                            <Form.Item 
+                                name="level" 
+                                label="Level:"
+                                {...this.formLayout}
+                                rules={[{ required: true }]}
+                            >
+                                <Input />
+                            </Form.Item>
+                            <Form.Item 
+                                name="local_name" 
+                                label="Local Name:"
+                                {...this.formLayout}
+                                rules={[{ required: true }]}
+                            >
+                                <Input />
+                            </Form.Item>
+                            <Form.Item 
+                                name="en_name" 
+                                label="En Name:"
+                                {...this.formLayout}
+                                rules={[{ required: true }]}
+                            >
+                                <Input />
+                            </Form.Item>
+                            <Form.Item 
+                                name="description" 
+                                label="Description:"
+                                {...this.formLayout}
+                                rules={[{ required: false }]}
+                            >
+                                <Input />
+                            </Form.Item>
+                        </Form>
+                    </Modal>
+                </div>
             );
         }
 
@@ -164,21 +261,18 @@ class MacroRegions extends React.Component {
 
         return (
             <StandardPage 
+                ref={this.pageRef}
                 title="Macro Regions" 
                 columns={columns}
-                formRef={this.formRef}
-                data={this.state.data}
                 rowKey="id"
-                newRow={this.newRow}
-                addRow={this.addRow}
-                updateRow={this.updateRow}
-                removeRow={this.removeRow}
-                fetchData={this.fetchData}
+                formTitle={this.getFormTitle}
+                formContent={this.getFormContent}
+                onAdd={this.handleAddRow}
+                onUpdate={this.handleUpdateRow}
+                onRemove={this.handleRemoveRow}
+                onFetchData={this.handleFetchData}
                 expandedRowRender={record => expandedRowRender(record)}
                 extraOperations={record => extraOperations(record)}
-                initialValues={{
-                    ['monthly_data']: false
-                }}
             />
         )
         

@@ -20,9 +20,9 @@ export function removeMacroRegion(params, callback) {
     return macroRegionApi.deleteMacroRegionApiV1MacroRegionMacroRegionIdDelete(params, callback)
 }
 
-export function updateMacroRegion(params, id, callback) {
+export function updateMacroRegion(params, callback) {
     const model = UpdateMacroRegionModel.constructFromObject(params)
-    return macroRegionApi.updateMacroRegionApiV1MacroRegionMacroRegionIdPatch(id, model, callback)
+    return macroRegionApi.updateMacroRegionApiV1MacroRegionMacroRegionIdPatch(params['id'], model, callback)
 }
 
 export function queryMacroRegion(params, callback) {

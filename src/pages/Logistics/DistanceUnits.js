@@ -1,14 +1,17 @@
 import React from 'react';
 import { connect } from 'dva';
-import StandardPage from '@/components/StandardPage';
+import PageHeaderWrapper from '@/components//PageHeaderWrapper'
+import StandardTable from '@/components//StandardTable'
+import StandardButtonBox from '@/components//StandardButtonBox' 
 import {
     Input,
     Form,
+    Card
 } from 'antd';
 
 class DistanceUnits extends React.Component {
 
-    pageRef = React.createRef();
+    tableRef = React.createRef();
 
     formLayout = {
         labelCol: { span: 7 },
@@ -50,13 +53,21 @@ class DistanceUnits extends React.Component {
         )
     }
 
+    handleAdd = (item) => {
+        this.tableRef.current.add(item)
+    }
+
+    handleRefresh = () => {
+        this.tableRef.current.refreshData()
+    }
+
     handleAddRow = (payload) => {
         const { dispatch } = this.props;
         dispatch({
             type: 'distanceUnit/add',
             payload,
             callback: (function(error, data, response) {
-                this.pageRef.current.handleRefresh()
+                this.handleRefresh()
             }).bind(this)
         })
     }
@@ -67,7 +78,7 @@ class DistanceUnits extends React.Component {
             type: 'distanceUnit/update',
             payload,
             callback: (function(error, data, response) {
-                this.pageRef.current.handleRefresh()
+                this.handleRefresh()
             }).bind(this)
         })
     }
@@ -78,7 +89,7 @@ class DistanceUnits extends React.Component {
             type: 'distanceUnit/remove',
             payload: payload['id'],
             callback: (function(error, data, response) {
-                this.pageRef.current.handleRefresh()
+                this.handleRefresh()
             }).bind(this)
         })
     }
@@ -89,7 +100,7 @@ class DistanceUnits extends React.Component {
             type: 'distanceUnit/fetch',
             payload: {...params},
             callback: (function(error, data, response) {
-                this.pageRef.current.setData(data)
+                this.tableRef.current.setData(data)
             }).bind(this)
         })
     }
@@ -117,18 +128,27 @@ class DistanceUnits extends React.Component {
         ]
 
         return (
-            <StandardPage 
-                ref={this.pageRef}
-                title="Distance Units" 
-                columns={columns}
-                rowKey="id"
-                formTitle={this.getFormTitle}
-                formContent={this.getFormContent}
-                onAdd={this.handleAddRow}
-                onUpdate={this.handleUpdateRow}
-                onRemove={this.handleRemoveRow}
-                onFetchData={this.handleFetchData}
-            />
+            <PageHeaderWrapper title="Distance Units" >
+                <Card bordered={false}>
+                    <div>
+                        <StandardButtonBox
+                            onAdd={this.handleAdd}
+                            onRefresh={this.handleRefresh}
+                        />
+                        <StandardTable 
+                            ref={this.tableRef}
+                            columns={columns}
+                            rowKey="id"
+                            formTitle={this.getFormTitle}
+                            formContent={this.getFormContent}
+                            onAdd={this.handleAddRow}
+                            onUpdate={this.handleUpdateRow}
+                            onRemove={this.handleRemoveRow}
+                            onFetchData={this.handleFetchData}
+                        />
+                    </div>
+                </Card>
+            </PageHeaderWrapper>
         )
         
     }

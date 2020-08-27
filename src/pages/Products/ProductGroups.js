@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'dva';
 import PageHeaderWrapper from '@/components//PageHeaderWrapper'
 import StandardTable from '@/components//StandardTable'
-import StandardButtonBox from '@/components//StandardButtonBox' 
+import StandardButtonBox from '@/components/StandardButtonBox' 
 import {
     Input,
     Form,
@@ -17,6 +17,19 @@ class ProductGroups extends React.Component {
         labelCol: { span: 7 },
         wrapperCol: { span: 13 },
     };
+
+    state = {
+        data: [],
+        pagination: {
+            current: 1,
+            pageSize: 10,
+            total: 0
+        },
+    }
+
+    componentDidMount() {
+        this.handleRefresh()
+    } 
 
     getFormTitle = (current) => {
         return !current.id  ? "Add Product Group" : "Edit Product Group"
@@ -46,11 +59,12 @@ class ProductGroups extends React.Component {
     }
 
     handleAdd = (item) => {
-        this.tableRef.current.add(item)
+        this.tableRef.current.addRecord(item)
     }
 
     handleRefresh = () => {
-        this.tableRef.current.refreshData()
+        const { pagination } = this.state
+        this.tableRef.current.handleStandardTableChange(pagination)
     }
 
     handleAddRow = (payload) => {
@@ -69,7 +83,6 @@ class ProductGroups extends React.Component {
         dispatch({
             type: 'productGroup/update',
             payload,
-            id: payload['id'],
             callback: (function(error, data, response) {
                 this.handleRefresh()
             }).bind(this)
@@ -93,7 +106,14 @@ class ProductGroups extends React.Component {
             type: 'productGroup/fetch',
             payload: {...params},
             callback: (function(error, data, response) {
-                this.tableRef.current.setData(data)
+                this.setState({
+                    data: data.data,
+                    pagination: {
+                        current: (data.offset / 10) + 1,
+                        pageSize: data.limit,
+                        total: data.total
+                    }
+                })
             }).bind(this)
         })
     }
@@ -114,8 +134,10 @@ class ProductGroups extends React.Component {
             },
         ]
 
+        const { data, pagination } = this.state;
+
         return (
-            <PageHeaderWrapper title="Product Groups" >
+            <PageHeaderWrapper title="Product Groups">
                 <Card bordered={false}>
                     <div>
                         <StandardButtonBox
@@ -126,6 +148,8 @@ class ProductGroups extends React.Component {
                             ref={this.tableRef}
                             columns={columns}
                             rowKey="id"
+                            data={data}
+                            pagination={pagination}
                             formTitle={this.getFormTitle}
                             formContent={this.getFormContent}
                             onAdd={this.handleAddRow}

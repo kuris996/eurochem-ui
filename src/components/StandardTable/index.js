@@ -2,7 +2,9 @@ import React, { PureComponent } from 'react';
 import { 
     Table,
     Form,
-    Modal 
+    Modal,
+    Result,
+    Button
 } from 'antd';
 import styles from './index.less';
 import StandardOperation from '../StandardOperation'
@@ -10,36 +12,20 @@ import StandardOperation from '../StandardOperation'
 class StandardTable extends PureComponent {
 
     state = {
-        data: [],
-        pagination: {
-            current: 1,
-            pageSize: 10,
-            total: 0
-        },
         modalVisible: false,
-        current: undefined
+        current: undefined,
+        done: false
     }
 
     formRef = React.createRef()
 
-    setData = (data) => {
-        this.setState({
-            data: data.data,
-            pagination: {
-                current: (data.offset / 10) + 1,
-                pageSize: data.limit,
-                total: data.total
-            }
-        })
-    }
-
-    handleStandardTableChange=(pagination, filtersArg, sorter) => { 
+    handleStandardTableChange = (pagination, filtersArg, sorter) => { 
         const { onFetchData } = this.props
         const params = { offset: (pagination.current - 1) * 10, limit: 10 }
         onFetchData(params);
     }
 
-    add = (item) => {
+    addRecord = (item) => {
         this.setState({
             modalVisible: true,
             current: undefined
@@ -72,9 +58,8 @@ class StandardTable extends PureComponent {
                 if (onUpdate)
                     onUpdate({id, ...fields})
             }
-
             this.setState({
-                modalVisible: false
+                done: true
             })
         })
         .catch(errorInfo => {
@@ -83,19 +68,24 @@ class StandardTable extends PureComponent {
     }
 
     handleCancel = () => {
+        const { onCancel } = this.props;
         this.setState({
             modalVisible: false
         })
-    }
-    
-    refreshData = () => {
-        const { pagination } = this.state
-        this.handleStandardTableChange(pagination)
+        if (onCancel)
+            onCancel()
     }
 
+    handleDone = () => {
+        this.setState({
+            done: false,
+            modalVisible: false,
+        });
+    }
+    
     render() {
-        const { rowKey = rowKey || 'id', columns, extraOperations, formContent, formTitle, initialValues, ...rest } = this.props;
-        const { data, pagination, modalVisible, current = {} } = this.state
+        const { data = [], pagination, rowKey = rowKey || 'id', columns, extraOperations, formContent, formTitle, initialValues, ...rest } = this.props;
+        const { modalVisible, current = {}, done } = this.state
 
         const paginationProps = {
             showSizeChanger: true,
@@ -120,6 +110,25 @@ class StandardTable extends PureComponent {
                 )
             }
         }]
+
+        const modalFooter = done
+        ? { footer: null, onCancel: this.handleDone }
+        : { okText: 'OK', onOk: this.handleSubmit, onCancel: this.handleCancel };
+
+        const doneContent = () => {
+            return (
+                <Result
+                    status="success"
+                    title="Successfully Completed"
+                    extra={
+                    <Button type="primary" onClick={this.handleDone}>
+                        Done
+                    </Button>
+                    }
+                    className={styles.formResult}
+                />
+            );
+        }
         
         return (
             <div className={styles.standardTable}>
@@ -134,17 +143,16 @@ class StandardTable extends PureComponent {
                     {...rest}
                 />
                 <Modal
-                    title={formTitle(current)}
+                    title={done ? null : formTitle(current)}
                     className={styles.standardTableForm}
                     width={640}
-                    bodyStyle={{ padding: '28px 0 0' }}
+                    bodyStyle={done ? { padding: '72px 0' } : { padding: '28px 0 0' }}
                     destroyOnClose
                     visible={modalVisible}
-                    onOk={this.handleSubmit}
-                    onCancel={this.handleCancel}
+                    {...modalFooter}
                 >
                     <Form ref={this.formRef} onSubmit={this.handleSumbit} initialValues={initialValues}>
-                        {formContent(current )}
+                        {done ? doneContent() : formContent(current )}
                     </Form>
                 </Modal>
             </div>

@@ -26,9 +26,19 @@ class Products extends React.Component {
     };
 
     state = {
+        data: [],
+        pagination: {
+            current: 1,
+            pageSize: 10,
+            total: 0
+        },
         parent: undefined,
         productGroups: [],
     }
+
+    componentDidMount() {
+        this.handleRefresh()
+    } 
 
     getFormTitle = (current) => {
         return !current.id ? "Add Product" : "Edit Product"
@@ -105,11 +115,12 @@ class Products extends React.Component {
     }
 
     handleAdd = (item) => {
-        this.tableRef.current.add(item)
+        this.tableRef.current.addRecord(item)
     }
 
     handleRefresh = () => {
-        this.tableRef.current.refreshData()
+        const { pagination } = this.state
+        this.tableRef.current.handleStandardTableChange(pagination)
     }
 
     handleAddRow = (payload) => {
@@ -152,7 +163,6 @@ class Products extends React.Component {
         .filter(item => item[link] === id)
         .map(item => ({ ...item, children: this.convertListToTree(items, item.id) }))
 
-
     handleFetchData = (params) => {
         const { dispatch } = this.props;
 
@@ -160,14 +170,15 @@ class Products extends React.Component {
             type: 'product/fetch',
             payload: {...params},
             callback: (function(error, data, response) {
-                const newData = {
-                    ...data,
-                    data: this.convertListToTree(data.data)
-                }
                 this.setState({
-                    parent: undefined
+                    data: this.convertListToTree(data.data),
+                    pagination: {
+                        current: (data.offset / 10) + 1,
+                        pageSize: data.limit,
+                        total: data.total
+                    },
+                    parent: undefined,
                 })
-                this.tableRef.current.setData(newData)
             }).bind(this)
         })
 
@@ -186,15 +197,7 @@ class Products extends React.Component {
         this.setState({
             parent: record
         })
-        this.tableRef.current.add(record)
-    }
-
-    extraOperations = (record) => {
-        return (
-            <Button style={{ marginLeft: 8 }} onClick={() => this.addChildRow(record)}>
-                <PlusOutlined/>
-            </Button>
-        )
+        this.handleAdd()
     }
 
     render() {
@@ -237,6 +240,16 @@ class Products extends React.Component {
             },
         ]
 
+        const { data, pagination } = this.state;
+
+        const extraOperations = (record) => {
+            return (
+                <Button style={{ marginLeft: 8 }} onClick={() => this.addChildRow(record)}>
+                    <PlusOutlined/>
+                </Button>
+            )
+        }
+
         return (
             <PageHeaderWrapper title="Products" >
                 <Card bordered={false}>
@@ -249,13 +262,15 @@ class Products extends React.Component {
                             ref={this.tableRef}
                             columns={columns}
                             rowKey="id"
+                            data={data}
+                            pagination={pagination}
                             formTitle={this.getFormTitle}
                             formContent={this.getFormContent}
                             onAdd={this.handleAddRow}
                             onUpdate={this.handleUpdateRow}
                             onRemove={this.handleRemoveRow}
                             onFetchData={this.handleFetchData}
-                            extraOperations={this.extraOperations}
+                            extraOperations={(record) => extraOperations(record)}
                         />
                     </div>
                 </Card>

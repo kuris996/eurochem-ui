@@ -1,24 +1,23 @@
 import React from 'react';
 import { connect } from 'dva';
-import StandardPage from '@/components/StandardPage';
-import StandardTable from '@/components/StandardTable';
+import PageHeaderWrapper from '@/components//PageHeaderWrapper'
+import StandardTable from '@/components//StandardTable'
+import StandardButtonBox from '@/components/StandardButtonBox'
 import { 
     Switch, 
     Button,
     Form,
     Input,
-    Modal
+    Modal,
+    Card
 } from 'antd';
 import { 
     PlusOutlined,
 } from '@ant-design/icons';
 
-import styles from '@/components/StandardPage/index.less'
-
 class MacroRegions extends React.Component {
 
-    pageRef = React.createRef();
-    formRef = React.createRef();
+    tableRef = React.createRef();
 
     formLayout = {
         labelCol: { span: 7 },
@@ -26,34 +25,28 @@ class MacroRegions extends React.Component {
     };
 
     state = {
+        data: [],
+        pagination: {
+            current: 1,
+            pageSize: 10,
+            total: 0
+        },
         parent: undefined,
-        modalVisible: false,
     }
-    /*
-    newRow = () => {
-        const row = {
-            id: '',
-            code: '',
-            local_name: '',
-            en_name: '',
-            description: '',
-            monthly_data: false,
-            levels: []
-        }
-        const { data } = this.state;
-        this.setState({
-            data: [...data, row]
-        })
-    }
-    */
+
+    componentDidMount() {
+        this.handleRefresh()
+    }    
 
     getFormTitle = (current) => {
         return !current.id ? "Add Macro Region" : "Edit Macro Region"
     }
 
     getFormContent = (current) => {
-        return (
-            <>
+        const { parent } = this.state
+        if (parent === undefined) {
+            return (
+                <>
                 <Form.Item 
                     name="code" 
                     label="Code:"
@@ -101,16 +94,75 @@ class MacroRegions extends React.Component {
                     <Switch />
                 </Form.Item>
             </>
+            )
+        }
+        return this.getLevelFormContent()
+    }
+
+    getLevelFormContent = (current = {}) => {
+        return (
+            <>
+                <Form.Item 
+                    name="level" 
+                    label="Level:"
+                    {...this.formLayout}
+                    initialValue={current.level}
+                    rules={[{ required: true }]}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                    name="local_name" 
+                    label="Local Name:"
+                    {...this.formLayout}
+                    initialValue={current.local_name}
+                    rules={[{ required: true }]}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                    name="en_name" 
+                    label="En Name:"
+                    {...this.formLayout}
+                    initialValue={current.en_name}
+                    rules={[{ required: true }]}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item 
+                    name="description" 
+                    label="Description:"
+                    {...this.formLayout}
+                    initialValue={current.description}
+                    rules={[{ required: false }]}
+                >
+                    <Input />
+                </Form.Item>
+            </>
         )
+    }
+
+    handleAdd = (item) => {
+        this.tableRef.current.addRecord(item)
+    }
+
+    handleRefresh = () => {
+        const { pagination } = this.state
+        this.tableRef.current.handleStandardTableChange(pagination)
     }
 
     handleAddRow = (payload) => {
         const { dispatch } = this.props;
+        const { parent } = this.state
+        if (parent !== undefined)
+            payload = ({ ...parent, levels: [...parent.levels, payload] })
+        else
+            payload = ({ ...payload, levels: [] })
         dispatch({
             type: 'macroRegion/add',
-            payload: ({ ...payload, levels: [] }),
+            payload,
             callback: (function(error, data, response) {
-                this.pageRef.current.handleRefresh()
+                this.handleRefresh()
             }).bind(this)
         })
     }
@@ -121,7 +173,7 @@ class MacroRegions extends React.Component {
             type: 'macroRegion/update',
             payload,
             callback: (function(error, data, response) {
-                this.pageRef.current.handleRefresh()
+                this.handleRefresh()
             }).bind(this)
         })
     }
@@ -132,7 +184,7 @@ class MacroRegions extends React.Component {
             type: 'macroRegion/remove',
             payload: payload['id'],
             callback: (function(error, data, response) {
-                this.pageRef.current.handleRefresh()
+                this.handleRefresh()
             }).bind(this)
         })
     }
@@ -143,16 +195,30 @@ class MacroRegions extends React.Component {
             type: 'macroRegion/fetch',
             payload: {...params},
             callback: (function(error, data, response) {
-                this.pageRef.current.setData(data)
+                this.setState({
+                    data: data.data,
+                    pagination: {
+                        current: (data.offset / 10) + 1,
+                        pageSize: data.limit,
+                        total: data.total
+                    },
+                    parent: undefined
+                })
             }).bind(this)
+        })
+    }
+
+    handleCancel = () => {
+        this.setState({
+            parent: undefined
         })
     }
 
     addLevel = (record) => {
         this.setState({
-            modalVisible: true,
             parent: record
         })
+        this.handleAdd(record)
     }
 
     render() {
@@ -193,63 +259,49 @@ class MacroRegions extends React.Component {
               { title: 'Local Name', dataIndex: 'local_name', key: 'local_name', width: 150 },
               { title: 'En Name', dataIndex: 'en_name', key: 'en_name', width: 150 },
               { title: 'Description', dataIndex: 'description', key: 'description', width: 150 },
-            ];
-        
-            const { levels } = record
-            const { modalVisible } = this.state
+            ];        
             
+            const { levels = {} } = record
+                        
+            const getFormLevelTitle = (current) => {
+                return "Edit Level"
+            }
+
+            const handleRemoveLevel = (level, record) => {
+                const val = record.levels.find(l => l.level === level.level)
+                const index = record.levels.indexOf(val)
+                if (index >= 0) {
+                    record.levels.splice(index, 1)
+                }
+                this.handleUpdateRow(record)
+            }
+
+            const handleUpdateLevel = (level, record) => {
+                const val = record.levels.find(l => l.level === level.level)
+                const index = record.levels.indexOf(val)
+                if (index >= 0) {
+                    record.levels[index] = level
+                }
+                this.handleUpdateRow(record)
+            }
+
             return (
                 <div>
                     <StandardTable 
-                        rowKey={'id'}
-                        columns={columns} 
+                        columns={columns}
+                        rowKey="id"
                         data={levels}
+                        pagination={false}
+                        formTitle={current => getFormLevelTitle(current)}
+                        formContent={this.getLevelFormContent}
+                        onRemove={level => handleRemoveLevel(level, record)}
+                        onUpdate={level => handleUpdateLevel(level, record)}
                     />
-                    <Modal
-                        className={styles.standardPageForm}
-                        width={640}
-                        bodyStyle={{ padding: '28px 0 0' }}
-                        destroyOnClose
-                        visible={modalVisible}
-                    >
-                        <Form ref={this.formRef}>
-                            <Form.Item 
-                                name="level" 
-                                label="Level:"
-                                {...this.formLayout}
-                                rules={[{ required: true }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item 
-                                name="local_name" 
-                                label="Local Name:"
-                                {...this.formLayout}
-                                rules={[{ required: true }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item 
-                                name="en_name" 
-                                label="En Name:"
-                                {...this.formLayout}
-                                rules={[{ required: true }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item 
-                                name="description" 
-                                label="Description:"
-                                {...this.formLayout}
-                                rules={[{ required: false }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                        </Form>
-                    </Modal>
                 </div>
             );
         }
+
+        const { data, pagination } = this.state;
 
         const extraOperations = (record) => {
             return (
@@ -260,22 +312,33 @@ class MacroRegions extends React.Component {
         }
 
         return (
-            <StandardPage 
-                ref={this.pageRef}
-                title="Macro Regions" 
-                columns={columns}
-                rowKey="id"
-                formTitle={this.getFormTitle}
-                formContent={this.getFormContent}
-                onAdd={this.handleAddRow}
-                onUpdate={this.handleUpdateRow}
-                onRemove={this.handleRemoveRow}
-                onFetchData={this.handleFetchData}
-                expandedRowRender={record => expandedRowRender(record)}
-                extraOperations={record => extraOperations(record)}
-            />
-        )
-        
+            <PageHeaderWrapper title="Macro Regions" >
+                <Card bordered={false}>
+                    <div>
+                        <StandardButtonBox
+                            onAdd={this.handleAdd}
+                            onRefresh={this.handleRefresh}
+                        />
+                        <StandardTable 
+                            ref={this.tableRef}
+                            columns={columns}
+                            rowKey="id"
+                            data={data}
+                            pagination={pagination}
+                            formTitle={this.getFormTitle}
+                            formContent={this.getFormContent}
+                            onAdd={this.handleAddRow}
+                            onUpdate={this.handleUpdateRow}
+                            onRemove={this.handleRemoveRow}
+                            onCancel={this.handleCancel}
+                            onFetchData={this.handleFetchData}
+                            expandedRowRender={record => expandedRowRender(record)}
+                            extraOperations={record => extraOperations(record)}
+                        />
+                    </div>
+                </Card>
+            </PageHeaderWrapper>            
+        )        
     }
 }
 
